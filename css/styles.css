@@ -1,0 +1,28 @@
+body { 
+	background-color:#CCC; 
+	height: 100% }
+
+#map-outer {  
+	height: 100%; 
+	padding: 20px; 
+	border: 2px solid #CCC; 
+	margin-bottom: 20px; 
+	background-color:#FFF }
+	  
+#map-canvas { height: 650px}
+
+#format { margin-top: 2em }
+
+#titlebar {
+	padding: 40px; 
+	border: 2px solid #CCC; 
+	background-color:#5123cf;
+	color:white;}
+
+
+button {
+    margin: 0;
+    padding: 0;
+    height: 40px;
+    width: 100%;
+    vertical-align: middle }
