@@ -48,12 +48,11 @@ var resultMarkers = function (locations) {
 
     self.initialize = function () {
         infowindow = new google.maps.InfoWindow();
-        var locationTypes = ['bank'];//, 'cafe', 'grocery_or_supermarket', 'restaurant', 'school', 'shopping_mall'];
+        var locationTypes = ['bank', 'cafe', 'grocery_or_supermarket', 'restaurant', 'school', 'shopping_mall'];
         for (var index = 0; index < locationTypes.length; index++) {
             var request = {
                 location: new google.maps.LatLng(37.773896, -121.924922),
                 radius: 3000,
-                //types: ['store', 'school', 'food', 'shopping']
                 types: [locationTypes[index]]
             };
 
@@ -71,13 +70,10 @@ var resultMarkers = function (locations) {
         if (status == google.maps.places.PlacesServiceStatus.OK) {
             //filteredResults = self.filterSchools(results);
             for (var i = 0; i < results.length; i++) {
-                var image = "images/school.png";
-                if (results[i].types.indexOf('bank') >= 0) {
-                    image = "images/bank.png"
-                }
-                var marker = self.createMarker(results[i], image);
-                results[i].marker = marker;
 
+                var marker = self.createMarker(results[i]);
+
+                results[i].marker = marker;
 
                 google.maps.event.addListener(marker, 'click', (function (currentResult) {
                     return function () {
@@ -94,12 +90,27 @@ var resultMarkers = function (locations) {
         }
     };
 
-    self.createMarker = function (place, image) {
-        var placeLoc = place.geometry.location;
+    self.createMarker = function (result) {
+        var placeLoc = result.geometry.location;
+
+        var image = "images/school.png";
+        if (result.types.indexOf('bank') >= 0) {
+            image = "images/bank.png"
+        }
+        else if (result.types.indexOf('cafe') >= 0) {
+            image = "images/coffee.png"
+        } else if (result.types.indexOf('grocery_or_supermarket') >= 0) {
+            image = "images/grocery.png"
+        }
+        else if (result.types.indexOf('restaurant') >= 0) {
+            image = "images/restaurant.png"
+        } else if (result.types.indexOf('shopping_mall') >= 0) {
+            image = "images/shoppingmall.png"
+        }
 
         var marker = new google.maps.Marker({
             map: map,
-            position: place.geometry.location,
+            position: result.geometry.location,
             icon: image
         });
 
