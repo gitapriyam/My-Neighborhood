@@ -47,25 +47,47 @@ var resultMarkers = function (locations) {
     }
 
     self.initialize = function () {
-
-        var request = {
-            location: new google.maps.LatLng(37.773896, -121.924922),
-            radius: 3000,
-            //types: ['store', 'school', 'food', 'shopping']
-            types: ['school']
-        };
         infowindow = new google.maps.InfoWindow();
-        var service = new google.maps.places.PlacesService(map);
-        service.nearbySearch(request, self.callback);
+        var locationTypes = ['bank'];//, 'cafe', 'grocery_or_supermarket', 'restaurant', 'school', 'shopping_mall'];
+        for (var index = 0; index < locationTypes.length; index++) {
+            var request = {
+                location: new google.maps.LatLng(37.773896, -121.924922),
+                radius: 3000,
+                //types: ['store', 'school', 'food', 'shopping']
+                types: [locationTypes[index]]
+            };
+
+            setTimeout((function (currentRequest) {
+                return function () {
+                    var service = new google.maps.places.PlacesService(map);
+                    service.nearbySearch(currentRequest, self.callback);
+                }
+            })(request), 1500);
+        }
     };
 
 
     self.callback = function (results, status) {
         if (status == google.maps.places.PlacesServiceStatus.OK) {
-            filteredResults = self.filterSchools(results);
-            for (var i = 0; i < filteredResults.length; i++) {
-                self.createMarker(results[i], "images/school.png");
-                if (i > 5) {
+            //filteredResults = self.filterSchools(results);
+            for (var i = 0; i < results.length; i++) {
+                var image = "images/school.png";
+                if (results[i].types.indexOf('bank') >= 0) {
+                    image = "images/bank.png"
+                }
+                var marker = self.createMarker(results[i], image);
+                results[i].marker = marker;
+
+
+                google.maps.event.addListener(marker, 'click', (function (currentResult) {
+                    return function () {
+                        infowindow.setContent(currentResult.name);
+                        infowindow.open(map, this);
+                    }
+                })(results[i]));
+
+                console.log(results[i]);
+                if (i >= 4) {
                     break;
                 }
             }
@@ -74,16 +96,14 @@ var resultMarkers = function (locations) {
 
     self.createMarker = function (place, image) {
         var placeLoc = place.geometry.location;
+
         var marker = new google.maps.Marker({
             map: map,
             position: place.geometry.location,
             icon: image
         });
-        google.maps.event.addListener(marker, 'click', function () {
-            infowindow.setContent(place.name);
-            infowindow.open(map, this);
-        });
 
+        return marker;
     };
 }
 
