@@ -26,6 +26,7 @@ var locationsModel = function () {
 
 var resultMarkers = function (locations) {
     var self = this;
+
     self.searchReq = ko.observable("");     //user input to Search box
 
     self.filteredMarkers = ko.computed(function () {
