@@ -22,7 +22,29 @@
     <!--<script type="text/javascript" src="js/script2.js"></script>-->
 </head>
 <body>
-    <div id="map-canvas"></div>
+    
+    <div class="container">
+        <div id="title-outer" class="col-md-12 col-xs-12">
+            <div class="row">
+                <div id="titlebar" class="col-md-12 col-xs-12">
+                    <h3>Neighborhood Map</h3>
+                </div>
+            </div>
+        </div>
+        <div id="map-outer" class="col-md-12 col-xs-12">
+            <div class="row">
+                <div id="sidebar" class="col-md-3 col-xs-4">
+                    <p>Locations:</p>
+                    <div id="loc-list" data-bind="foreach: filteredMarkers">
+                        <button data-bind="text: title, click: myMarkers.toggleBounce"></button><br>
+                    </div>
+                </div> <!--sidebar-->
+                <div id="map-canvas" class="col-md-9 col-xs-8"> </div>
+
+            </div><!--row-->
+        </div><!--map-outer-->
+    </div><!--container-->
+
     <script src="js/script2.js"></script>
 </body>
 </html>

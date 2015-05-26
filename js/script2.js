@@ -9,45 +9,11 @@ var mapOptions = {
 
 map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
 
-var locationsModel = function () {
-    var self = this;
-    self.locationsArray = [];
+var locationsModel = {
+    self : this,
+    locationsArray: [],
 
-    self.addItem = function (object) {
-        self.locationsArray.push(object)
-    };
-
-    self.locations = function () {
-        return locationsArray;
-    }
-
-};
-
-
-var resultMarkers = function (locations) {
-    var self = this;
-
-    self.searchReq = ko.observable("");     //user input to Search box
-
-    self.filteredMarkers = ko.computed(function () {
-        var arrayResults = [];
-        arrayResults = $.grep(locations, function (input) {
-            var titleSearch = input.name.toLowerCase().indexOf(self.searchReq().toLowerCase());
-            return (titleSearch > -1 && a.status() === "OK")
-        });
-        return arrayResults;
-    });
-
-    self.filterSchools = function (results) {
-        var arrayResults = [];
-        arrayResults = $.grep(results, function (input) {
-            return (input.name.toLowerCase().indexOf("school") > 0) & ((!input.rating) || input.rating > 4);
-        });
-        return arrayResults;
-    }
-
-    self.initialize = function () {
-        infowindow = new google.maps.InfoWindow();
+    initialize: function () {
         var locationTypes = ['bank', 'cafe', 'grocery_or_supermarket', 'restaurant', 'school', 'shopping_mall'];
         for (var index = 0; index < locationTypes.length; index++) {
             var request = {
@@ -59,21 +25,28 @@ var resultMarkers = function (locations) {
             setTimeout((function (currentRequest) {
                 return function () {
                     var service = new google.maps.places.PlacesService(map);
-                    service.nearbySearch(currentRequest, self.callback);
+                    service.nearbySearch(currentRequest, locationsModel.callback);
                 }
-            })(request), 1500);
+            })(request), 500 * index);
         }
-    };
+    },
 
+    addItem: function (object) {
+        this.locationsArray.push(object)
+    },
 
-    self.callback = function (results, status) {
+    getLocations: function () {
+        return this.locationsArray;
+    },
+    callback: function (results, status) {
         if (status == google.maps.places.PlacesServiceStatus.OK) {
             //filteredResults = self.filterSchools(results);
             for (var i = 0; i < results.length; i++) {
 
-                var marker = self.createMarker(results[i]);
+                var marker = locationsModel.createMarker(results[i]);
 
                 results[i].marker = marker;
+                locationsModel.addItem(results[i]);
 
                 google.maps.event.addListener(marker, 'click', (function (currentResult) {
                     return function () {
@@ -88,9 +61,8 @@ var resultMarkers = function (locations) {
                 }
             }
         }
-    };
-
-    self.createMarker = function (result) {
+    },
+    createMarker: function (result) {
         var placeLoc = result.geometry.location;
 
         var image = "images/school.png";
@@ -115,10 +87,40 @@ var resultMarkers = function (locations) {
         });
 
         return marker;
-    };
-}
+    }
+};
 
+
+var resultMarkers = function (locations) {
+    var self = this;
+
+    self.searchReq = ko.observable("");     //user input to Search box
+
+    self.filteredMarkers = ko.computed(function () {
+        var arrayResults = [];
+        arrayResults = $.grep(locations, function (input) {
+            var titleSearch = input.name.toLowerCase().indexOf(self.searchReq().toLowerCase());
+            return (titleSearch > -1)
+        });
+        return arrayResults;
+    });
+
+    self.filterSchools = function (results) {
+        var arrayResults = [];
+        arrayResults = $.grep(results, function (input) {
+            return (input.name.toLowerCase().indexOf("school") > 0) & ((!input.rating) || input.rating > 4);
+        });
+        return arrayResults;
+    }
+
+    self.initialize = function () {
+        infowindow = new google.maps.InfoWindow();
+        
+    };
+
+}
+locationsModel.initialize();
 var myMarkers = new resultMarkers(locationsModel);
-ko.applyBindings(myMarkers.locations);
+ko.applyBindings(myMarkers);
 google.maps.event.addDomListener(window, 'load', myMarkers.initialize);
 

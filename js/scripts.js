@@ -17,7 +17,6 @@ var locationsModel = [
         status: ko.observable("OK"),
         marker: new google.maps.Marker(
 				{
-				    //position: new google.maps.LatLng(37.762866, -121.965306),
 				    position: new google.maps.LatLng(0, 0),
 				    icon: "images/restaurant.png",
 				    map: map
@@ -294,15 +293,15 @@ var locationsModel = [
 
 ]
 
-//// ---------------------------------- VIEWMODEL ------------------------------
+/* ====VIEWMODEL  === */
 
-var resultMarkers = function (members) {
+var locationMarkers = function (locations) {
     var self = this;
 
     self.searchReq = ko.observable("");     //user input to Search box
     self.filteredMarkers = ko.computed(function () {
         var arrayResults = [];
-        arrayResults = $.grep(members, function (a) {
+        arrayResults = $.grep(locations, function (a) {
             var titleSearch = a.title.toLowerCase().indexOf(self.searchReq().toLowerCase());
             return (titleSearch > -1)
         });
@@ -310,7 +309,7 @@ var resultMarkers = function (members) {
     });
 
     //Use street address in model to find LatLng
-    self.setPosition = function (member) {
+    self.initlocations = function (member) {
         geocoder = new google.maps.Geocoder();
         if (member.marker.position.A == 0) {
             geocoder.geocode({ 'address': member.address }, function (results, status) {
@@ -320,18 +319,14 @@ var resultMarkers = function (members) {
                     member.marker.map = map;
                     member.status = "OK";
                     self.animateMarkers(member);
-                    /* console.log(member.address);
-                    console.log(location.A + "," + location.F); */
                 } else if (status === "OVER_QUERY_LIMIT") {
                     // If status is OVER_QUERY_LIMIT, then wait and re-request
                     setTimeout(function () {
                         geocoder.geocode({ 'address': member.address }, function (results, status) {
-                            console.log(member.address);
                             if (results && results.length > 0) {
                                 var location = results[0].geometry.location;
                                 member.marker.position = location;
                                 self.animateMarkers(member);
-                                console.log(location.A + "," + location.F);
                             }
                         });
                     }, 3000);
@@ -347,17 +342,19 @@ var resultMarkers = function (members) {
     }
 
     self.initialize = function () {
-        for (current in members) {
-            setTimeout(self.setPosition(members[current]), 500);
+        for (current in locations) {
+            self.initlocations(locations[current]);
+            self.setBubble(current);
         }
+
     }
 
-     self.toggleBounce = function (currentMarker) {
+    self.toggleBounce = function (currentMarker) {
         if (currentMarker.marker.getAnimation() != null) {
             currentMarker.marker.setAnimation(null);
         } else {
             currentMarker.marker.setAnimation(google.maps.Animation.BOUNCE);
-            setTimeout(function () { currentMarker.marker.setAnimation(null) }, 1000); 
+            setTimeout(function () { currentMarker.marker.setAnimation(null) }, 1000);
         }
     }
 
@@ -365,15 +362,37 @@ var resultMarkers = function (members) {
     self.animateMarkers = function (member) {
         setTimeout((function (currentMember) {
             return function () {
-                member.marker.setAnimation(google.maps.Animation.DROP);
+                currentMember.marker.setAnimation(google.maps.Animation.DROP);
             }
         })(member), 500);
+    }
 
+    //Adds infowindows to each marker and populates them with Yelp API request data
+    self.setBubble = function (index) {
+        //Add event listener to each map marker to trigger the corresponding infowindow on click
+        google.maps.event.addListener(locations[index].marker, 'click', function () {
+            var infowindow = new google.maps.InfoWindow({
+                content: "<div id='yelpWindow'></div>",
+                maxWidth: 250
+            });
+
+            //Request Yelp info, then format it, and place it in infowindow
+            yelpApiCall(locations[index].phone, function (data) {
+                var contentString = "<div id='yelpWindow'>" +
+                                    "<h5>" + "<a href='" + data.mobile_url + "' target='_blank'>" + data.name + "</a>" + "</h5>" +
+                                    "<p>" + data.location.address + "</p>" +
+                                    "<p>" + data.display_phone + "</p>" +
+                                    "<img src='" + data.rating_img_url_large + "'>" +
+                                    "<p>" + data.snippet_text + "</p>" +
+                                    "</div>";
+                infowindow.setContent(contentString);
+            });
+            infowindow.open(map, locations[index].marker);
+        });
     }
 }
 
-//----
 
-var myMarkers = new resultMarkers(locationsModel);
-ko.applyBindings(myMarkers);
-google.maps.event.addDomListener(window, 'load', myMarkers.initialize);
+var myLocations = new locationMarkers(locationsModel);
+ko.applyBindings(myLocations);
+google.maps.event.addDomListener(window, 'load', myLocations.initialize);
