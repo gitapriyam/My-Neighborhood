@@ -229,31 +229,29 @@ var locationMarkers = function (locations) {
         
     */
     self.filteredLocations = ko.computed(function () {
-        var arrayResults = [];
-
         /* This resets all the markers on the map */
         for (var index = 0; index < locations.length; index++) {
             locations[index].marker.setMap(null);
         };
 
-        arrayResults = $.grep(locations, function (input) {
-            var titleSearch = input.title.toLowerCase().indexOf(self.filterCondition().toLowerCase());
+        var searchLocations = $.grep(locations, function (input) {
+            var nameSearch = input.title.toLowerCase().indexOf(self.filterCondition().toLowerCase());
             var typeSearch = input.type.toLowerCase().indexOf(self.filterCondition().toLowerCase());
-            return (((titleSearch > -1) || (typeSearch > -1)) && (input.status() == "OK"))
+            return (((nameSearch > -1) || (typeSearch > -1)) && (input.status() == "OK"))
         });
 
         /*  This assigns the filtered markers with a map
             This will limit the markers appearing on the map.
             This is done asynchronously.
         */
-        for (var currentIndex = 0; currentIndex < arrayResults.length; currentIndex++) {
+        for (var currentIndex = 0; currentIndex < searchLocations.length; currentIndex++) {
             setTimeout((function (result) {
                 return function () {
                     result.marker.setMap(map);
                 }
-            }(arrayResults[currentIndex])), 500);
+            }(searchLocations[currentIndex])), 500);
         };
-        return arrayResults;
+        return searchLocations;
     });
 
     /* Use Google Geocoding API to identify the latitude and longitude 
@@ -261,23 +259,23 @@ var locationMarkers = function (locations) {
     These results are fetched asynchronously
     The markers are animated for their positioning
     */
-    self.initlocations = function (member) {
+    self.initlocations = function (currentLocation) {
         geocoder = new google.maps.Geocoder();
-        if (member.marker.position.A == 0) {
-            geocoder.geocode({ 'address': member.address }, function (results, status) {
+        if (currentLocation.marker.position.A == 0) {
+            geocoder.geocode({ 'address': currentLocation.address }, function (results, status) {
                 if (status === "OK") {
-                    member.marker.position = results[0].geometry.location;
-                    self.animateMarkers(member);
+                    currentLocation.marker.position = results[0].geometry.location;
+                    self.animateMarkers(currentLocation);
                 } else if (status === "OVER_QUERY_LIMIT") {
                     /*  If for some reason, Google API does not return
                         results or number of queries exceed the limit stipulated,
                         we try to fetch the results another time asynchronously.
                     */
                     setTimeout(function () {
-                        geocoder.geocode({ 'address': member.address }, function (results, status) {
+                        geocoder.geocode({ 'address': currentLocation.address }, function (results, status) {
                             if (results && results.length > 0) {
-                                member.marker.position = results[0].geometry.location;
-                                self.animateMarkers(member);
+                                currentLocation.marker.position = results[0].geometry.location;
+                                self.animateMarkers(currentLocation);
                             }
                         });
                     }, 3000);
@@ -287,8 +285,8 @@ var locationMarkers = function (locations) {
                     the status attribute is set to error and these errored 
                     status locations do not participate in filter or 
                     animated locations */
-                    member.status = ko.observable("ERROR");
-                    console.log("Unable to fetch the location. The Error code: ", status, " for Location:", member.title);
+                    currentLocation.status = ko.observable("ERROR");
+                    console.log("Unable to fetch results for the location "+ currentLocation.title);
                 }
             });
         }
@@ -313,54 +311,51 @@ var locationMarkers = function (locations) {
         location is highlighed with animated marker.
     */
 
-    self.animateMarker = function (currentMarker) {
-        if (currentMarker.marker.getAnimation() != null) {
-            currentMarker.marker.setAnimation(null);
-        } else {
-            currentMarker.marker.setAnimation(google.maps.Animation.BOUNCE);
-            setTimeout(function () { currentMarker.marker.setAnimation(null) }, 1000);
+    self.animateMarker = function (currentLocation) {
+        currentLocation.marker.setAnimation(google.maps.Animation.BOUNCE);
+        setTimeout(function () { currentLocation.marker.setAnimation(null) }, 1000);
+    }
+}
+
+/* 
+    This function assigns animation property to the marker
+    asynchronously.
+*/
+
+self.animateMarkers = function (currentLocation) {
+    setTimeout((function (currentcurrentLocation) {
+        return function () {
+            currentcurrentLocation.marker.setAnimation(google.maps.Animation.DROP);
         }
-    }
-
-    /* 
-        This function assigns animation property to the marker
-        asynchronously.
-    */
-
-    self.animateMarkers = function (member) {
-        setTimeout((function (currentMember) {
-            return function () {
-                currentMember.marker.setAnimation(google.maps.Animation.DROP);
-            }
-        })(member), 500);
-    }
+    })(currentLocation), 500);
+}
 
     
-    /*
-        This function assigns listeners tp the markers. On clicking the
-        markers, the info window will show up with details from
-        Yelp API.
-    */
-    self.addEventListener= function (currentLocation) {
-        //Add event listener to each map marker to trigger the corresponding infowindow on click
-        google.maps.event.addListener(currentLocation.marker, 'click', function () {
+/*
+    This function assigns listeners tp the markers. On clicking the
+    markers, the info window will show up with details from
+    Yelp API.
+*/
+self.addEventListener= function (currentLocation) {
+    //Add event listener to each map marker to trigger the corresponding infowindow on click
+    google.maps.event.addListener(currentLocation.marker, 'click', function () {
 
-            //Request Yelp info, then format it, and place it in infowindow
-            yelpApiCall(currentLocation.phone, function (data) {
-                var contentString = "<div id='yelpReviewWindow'>" +
-                                    "<h4><u>" + "<a href='" + data.url + "' target='_blank'>" + data.name + "</a>" + "</u></h4>" +
-                                    "<p><b>Address</b> : " + data.location.address + "</p>" +
-                                    "<p><b>Phone </b> : " + data.display_phone + "</p>" +
-                                    "<p><b> Review Count </b>: " + data.review_count + "</p>" +
-                                    "<img src='" + data.rating_img_url_large + "'><br>" +
-                                    "<p> <b>Lastest Review </b>:" + data.snippet_text + "</p>" +
-                                    "</div>";
-                infowindow.setContent(contentString);
-            });
-
-            infowindow.open(map, currentLocation.marker);
+        //Request Yelp info, then format it, and place it in infowindow
+        yelpApiCall(currentLocation.phone, function (data) {
+            var contentString = "<div id='yelpReviewWindow'>" +
+                                "<h4><u>" + "<a href='" + data.url + "' target='_blank'>" + data.name + "</a>" + "</u></h4>" +
+                                "<p><b>Address</b> : " + data.location.address + "</p>" +
+                                "<p><b>Phone </b> : " + data.display_phone + "</p>" +
+                                "<p><b> Review Count </b>: " + data.review_count + "</p>" +
+                                "<img src='" + data.rating_img_url_large + "'><br>" +
+                                "<p> <b>Lastest Review </b>:" + data.snippet_text + "</p>" +
+                                "</div>";
+            infowindow.setContent(contentString);
         });
-    }
+
+        infowindow.open(map, currentLocation.marker);
+    });
+}
 }
 
 
