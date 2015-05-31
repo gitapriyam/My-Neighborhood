@@ -15,21 +15,7 @@ var locationsModel = [
         website: "http://marriott.com",
         phone: "(925) 244-6114",
         status: ko.observable("OK"),
-        marker: new google.maps.Marker(
-				{
-				    position: new google.maps.LatLng(0, 0),
-				    icon: "images/restaurant.png",
-				    map: map
-				}
-		)
-    }
-    ,
-    {
-        title: "Strategic Restaurants",
-        address: "3000 Executive Pkwy # 515, San Ramon, CA 94583",
-        website: "strategicrestaurants.com",
-        phone: "(925) 328-3300",
-        status: ko.observable("OK"),
+        type: "restaurant",
         marker: new google.maps.Marker(
 				{
 				    position: new google.maps.LatLng(0, 0),
@@ -44,6 +30,7 @@ var locationsModel = [
         website: "http://brassdoor.com",
         phone: "(925) 837-2501",
         status: ko.observable("OK"),
+        type: "restaurant",
         marker: new google.maps.Marker(
 				{
 				    position: new google.maps.LatLng(0, 0),
@@ -58,6 +45,7 @@ var locationsModel = [
         website: "http://zacharys.com",
         phone: "(925) 244-1222",
         status: ko.observable("OK"),
+        type: "restaurant",
         marker: new google.maps.Marker(
 				{
 				    position: new google.maps.LatLng(0, 0),
@@ -67,11 +55,12 @@ var locationsModel = [
 		)
     },
     {
-        title: "Straw Hat Restaurants Inc",
-        address: "18 Crow Canyon Ct, San Ramon, CA 94583",
-        website: "http://strawhatpizza.com",
-        phone: "(925) 837-3400",
+        title: "Clementine's Restaurant",
+        address: "18070 San Ramon Valley Blvd, San Ramon, CA 94583",
+        website: "http://clementinesca.com",
+        phone: "(925) 973-0433",
         status: ko.observable("OK"),
+        type: "restaurant",
         marker: new google.maps.Marker(
 				{
 				    position: new google.maps.LatLng(0, 0),
@@ -86,6 +75,7 @@ var locationsModel = [
         website: "http://dvhigh.net",
         phone: "(925) 479-6400",
         status: ko.observable("OK"),
+        type: "School",
         marker: new google.maps.Marker(
 				{
 				    position: new google.maps.LatLng(0, 0),
@@ -100,6 +90,7 @@ var locationsModel = [
         website: "http://ckes.srvusd.k12.ca.us",
         phone: "(925) 735-1183",
         status: ko.observable("OK"),
+        type: "School",
         marker: new google.maps.Marker(
 				{
 				    position: new google.maps.LatLng(0, 0),
@@ -114,6 +105,7 @@ var locationsModel = [
         website: "http://ih.schoolloop.com",
         phone: "(925) 824-2820",
         status: ko.observable("OK"),
+        type: "School",
         marker: new google.maps.Marker(
 				{
 				    position: new google.maps.LatLng(0, 0),
@@ -128,6 +120,7 @@ var locationsModel = [
         website: "http://target.com",
         phone: "(925) 277-0202",
         status: ko.observable("OK"),
+        type: "Shopping",
         marker: new google.maps.Marker(
 				{
 				    position: new google.maps.LatLng(0, 0),
@@ -142,6 +135,7 @@ var locationsModel = [
         website: "homegoods.com",
         phone: "(925) 277-1308",
         status: ko.observable("OK"),
+        type: "Shopping",
         marker: new google.maps.Marker(
 				{
 				    position: new google.maps.LatLng(0, 0),
@@ -151,11 +145,12 @@ var locationsModel = [
 		)
     },
     {
-        title: "The Marketplace Shopping Center",
-        address: "433 Market Pl, San Ramon, CA 94583",
-        website: "http://terramarcenters.com",
-        phone: "(925) 277-3000",
+        title: "Whole Foods Market",
+        address: "100 Sunset Dr, San Ramon, CA 94583",
+        website: "http://wholefoodsmarket.com",
+        phone: "(925) 355-9000",
         status: ko.observable("OK"),
+        type: "Shopping",
         marker: new google.maps.Marker(
 				{
 				    position: new google.maps.LatLng(0, 0),
@@ -165,132 +160,50 @@ var locationsModel = [
 		)
     },
     {
-        title: "Safeway Pharmacy (inside Safeway)",
-        address: "11060 Bollinger Canyon Rd,San Ramon, CA 94582",
-        website: "local.safeway.com",
-        phone: "(925) 359-2005",
+        title: "Applebee's",
+        address: "17900 San Ramon Valley Blvd, San Ramon, CA 94583",
+        website: "http://applebees.com",
+        phone: "(925) 327-1400",
         status: ko.observable("OK"),
+        type: "Bar",
         marker: new google.maps.Marker(
-				{
-				    position: new google.maps.LatLng(0, 0),
-				    icon: "images/shoppingmall.png",
-				    map: map
-				}
-		)
+                {
+                    position: new google.maps.LatLng(0, 0),
+                    icon: "images/bar.png",
+                    map: map
+                }
+        )
     },
     {
-        title: "Central Park",
-        address: "12501 Alcosta Blvd, San Ramon, CA 94583",
-        website: "",
-        phone: "",
+        title: "Ascona Pizza Company",
+        address: "11020 Bollinger Canyon Rd, San Ramon, CA 94582",
+        website: "http://asconapizza.com",
+        phone: "(925) 736-0606",
         status: ko.observable("OK"),
+        type: "Bar",
         marker: new google.maps.Marker(
-				{
-				    position: new google.maps.LatLng(0, 0),
-				    icon: "images/park.png",
-				    map: map
-				}
-		)
+                {
+                    position: new google.maps.LatLng(0, 0),
+                    icon: "images/bar.png",
+                    map: map
+                }
+        )
     },
     {
-        title: "Diablo Vista Park",
-        address: "Danville, CA 94506",
-        website: "",
-        phone: "",
+        title: "Crown Billiards",
+        address: "2416 San Ramon Valley Blvd, San Ramon, CA 94583",
+        website: "bayareacrownbilliards.com",
+        phone: "(925) 725-3900",
         status: ko.observable("OK"),
+        type: "Bar",
         marker: new google.maps.Marker(
-				{
-				    position: new google.maps.LatLng(37.7913816, -121.9218398),
-				    icon: "images/park.png",
-				    map: map
-				}
-		)
-    },
-    {
-        title: "Valley View Park",
-        address: "N Monarch Rd, San Ramon, CA 94582",
-        website: "",
-        phone: "",
-        status: ko.observable("OK"),
-        marker: new google.maps.Marker(
-				{
-				    position: new google.maps.LatLng(0, 0),
-				    icon: "images/park.png",
-				    map: map
-				}
-		)
-    },
-    {
-        title: "San Ramon Athan Downs",
-        address: "2991 Montevideo Dr, San Ramon, CA 94583",
-        website: "http://ci.san-ramon.ca.us",
-        phone: "(925) 973-3200",
-        status: ko.observable("OK"),
-        marker: new google.maps.Marker(
-				{
-				    position: new google.maps.LatLng(37.7483496, -121.9604823),
-				    icon: "images/park.png",
-				    map: map
-				}
-		)
-    },
-    {
-        title: "Bart",
-        address: "Dublin/Pleasanton BART Station",
-        website: "http://countyconnection.com",
-        phone: "",
-        status: ko.observable("OK"),
-        marker: new google.maps.Marker(
-				{
-				    position: new google.maps.LatLng(37.70172, -121.89906),
-				    icon: "images/train.png",
-				    map: map
-				}
-		)
-    },
-    {
-        title: "Citibank",
-        address: "3101 Crow Canyon Pl, San Ramon, CA 94583",
-        website: "http://citibank.com",
-        phone: "(800) 627-3999",
-        status: ko.observable("OK"),
-        marker: new google.maps.Marker(
-				{
-				    position: new google.maps.LatLng(37.7783408, -121.9710014),
-				    icon: "images/bank.png",
-				    map: map
-				}
-		)
-    },
-    {
-        title: "Bank of America",
-        address: "3100 Crow Canyon Pl, San Ramon, CA 94583",
-        website: "http://locators.bankofamerica.com",
-        phone: "(925) 277-3511",
-        status: ko.observable("OK"),
-        marker: new google.maps.Marker(
-				{
-				    position: new google.maps.LatLng(37.777918, -121.971852),
-				    icon: "images/bank.png",
-				    map: map
-				}
-		)
-    },
-    {
-        title: "Wells Fargo Bank",
-        address: "3111 Crow Canyon Pl, San Ramon, CA 94583",
-        website: "http://wellsfargo.com",
-        phone: "(925) 866-8182",
-        status: ko.observable("OK"),
-        marker: new google.maps.Marker(
-				{
-				    position: new google.maps.LatLng(37.7786764, -121.9702746),
-				    icon: "images/bank.png",
-				    map: map
-				}
-		)
+                {
+                    position: new google.maps.LatLng(0, 0),
+                    icon: "images/bar.png",
+                    map: map
+                }
+        )
     }
-
 ]
 
 /* ====VIEWMODEL  === */
@@ -313,12 +226,14 @@ var locationMarkers = function (locations) {
         geocoder = new google.maps.Geocoder();
         if (member.marker.position.A == 0) {
             geocoder.geocode({ 'address': member.address }, function (results, status) {
+                console.log(member.title);
                 if (status === "OK") {
                     var location = results[0].geometry.location;
                     member.marker.position = location;
                     member.marker.map = map;
                     member.status = "OK";
                     self.animateMarkers(member);
+                    console.log(member.title);
                 } else if (status === "OVER_QUERY_LIMIT") {
                     // If status is OVER_QUERY_LIMIT, then wait and re-request
                     setTimeout(function () {
@@ -327,6 +242,7 @@ var locationMarkers = function (locations) {
                                 var location = results[0].geometry.location;
                                 member.marker.position = location;
                                 self.animateMarkers(member);
+                                console.log(member.title);
                             }
                         });
                     }, 3000);
