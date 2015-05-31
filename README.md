@@ -44,8 +44,8 @@ and later it shows up the data it obtained from Yelp.
 References
 ----------------------
 
-Stackoverflow
-w3schools
-Google API documentation
-Yelp API
-Google maps Icons.
+http://Stackoverflow.com forums
+http://w3schools.com
+Google API documentation (https://developers.google.com/maps/documentation/geocoding/)
+Yelp API (https://www.yelp.com/developers/documentation)
+Google maps Icons (https://google-maps-icons.googlecode.com/files/map-icons-collection-2.0.zip)
