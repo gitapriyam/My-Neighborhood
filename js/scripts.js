@@ -237,7 +237,7 @@ var locationMarkers = function (locations) {
         var searchLocations = $.grep(locations, function (input) {
             var nameSearch = input.title.toLowerCase().indexOf(self.filterCondition().toLowerCase());
             var typeSearch = input.type.toLowerCase().indexOf(self.filterCondition().toLowerCase());
-            return (((nameSearch > -1) || (typeSearch > -1)) && (input.status() == "OK"))
+            return (((nameSearch > -1) || (typeSearch == 0 )) && (input.status() == "OK"))
         });
 
         /*  This assigns the filtered markers with a map
@@ -286,7 +286,7 @@ var locationMarkers = function (locations) {
                     status locations do not participate in filter or 
                     animated locations */
                     currentLocation.status = ko.observable("ERROR");
-                    console.log("Unable to fetch results for the location "+ currentLocation.title);
+                    console.log("Unable to fetch results for the location " + currentLocation.title);
                 }
             });
         }
@@ -315,47 +315,46 @@ var locationMarkers = function (locations) {
         currentLocation.marker.setAnimation(google.maps.Animation.BOUNCE);
         setTimeout(function () { currentLocation.marker.setAnimation(null) }, 1000);
     }
-}
 
-/* 
-    This function assigns animation property to the marker
-    asynchronously.
-*/
+    /* 
+        This function assigns animation property to the marker
+        asynchronously.
+    */
 
-self.animateMarkers = function (currentLocation) {
-    setTimeout((function (currentcurrentLocation) {
-        return function () {
-            currentcurrentLocation.marker.setAnimation(google.maps.Animation.DROP);
-        }
-    })(currentLocation), 500);
-}
+    self.animateMarkers = function (currentLocation) {
+        setTimeout((function (currentcurrentLocation) {
+            return function () {
+                currentcurrentLocation.marker.setAnimation(google.maps.Animation.DROP);
+            }
+        })(currentLocation), 500);
+    }
 
-    
-/*
-    This function assigns listeners tp the markers. On clicking the
-    markers, the info window will show up with details from
-    Yelp API.
-*/
-self.addEventListener= function (currentLocation) {
-    //Add event listener to each map marker to trigger the corresponding infowindow on click
-    google.maps.event.addListener(currentLocation.marker, 'click', function () {
 
-        //Request Yelp info, then format it, and place it in infowindow
-        yelpApiCall(currentLocation.phone, function (data) {
-            var contentString = "<div id='yelpReviewWindow'>" +
-                                "<h4><u>" + "<a href='" + data.url + "' target='_blank'>" + data.name + "</a>" + "</u></h4>" +
-                                "<p><b>Address</b> : " + data.location.address + "</p>" +
-                                "<p><b>Phone </b> : " + data.display_phone + "</p>" +
-                                "<p><b> Review Count </b>: " + data.review_count + "</p>" +
-                                "<img src='" + data.rating_img_url_large + "'><br>" +
-                                "<p> <b>Lastest Review </b>:" + data.snippet_text + "</p>" +
-                                "</div>";
-            infowindow.setContent(contentString);
+    /*
+        This function assigns listeners tp the markers. On clicking the
+        markers, the info window will show up with details from
+        Yelp API.
+    */
+    self.addEventListener = function (currentLocation) {
+        //Add event listener to each map marker to trigger the corresponding infowindow on click
+        google.maps.event.addListener(currentLocation.marker, 'click', function () {
+
+            //Request Yelp info, then format it, and place it in infowindow
+            yelpApiCall(currentLocation.phone, function (data) {
+                var contentString = "<div id='yelpReviewWindow'>" +
+                                    "<h4><u>" + "<a href='" + data.url + "' target='_blank'>" + data.name + "</a>" + "</u></h4>" +
+                                    "<p><b>Address</b> : " + data.location.address + "</p>" +
+                                    "<p><b>Phone </b> : " + data.display_phone + "</p>" +
+                                    "<p><b> Review Count </b>: " + data.review_count + "</p>" +
+                                    "<img src='" + data.rating_img_url_large + "'><br>" +
+                                    "<p> <b>Lastest Review </b>:" + data.snippet_text + "</p>" +
+                                    "</div>";
+                infowindow.setContent(contentString);
+            });
+
+            infowindow.open(map, currentLocation.marker);
         });
-
-        infowindow.open(map, currentLocation.marker);
-    });
-}
+    }
 }
 
 
