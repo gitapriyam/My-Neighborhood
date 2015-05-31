@@ -22,7 +22,7 @@
             <div class="row">
                 <div id="header" class="col-md-12 col-xs-12">
                     <h3>Neigborhood locations around Gale Ranch, San Ramon, CA </h3>
-                    <div id="searchbox">Search: <input id="search-field" data-bind="textInput: searchReq"></div>
+                    <div id="filterLocation">Filter (By Name or Type (restaurant, bar, school, shopping ) ):<input id="filetr-field" data-bind="textInput: filterCondition"></div>
                 </div>
             </div>
         </div>
@@ -30,12 +30,11 @@
             <div class="row">
                 <div id="sidebar" class="col-md-3 col-xs-4">
                     <p>Locations:</p>
-                    <div id="loc-list" data-bind="foreach: filteredMarkers">
-                        <button data-bind="text: title, click: myLocations.toggleBounce"></button><br>
+                    <div id="loc-list" data-bind="foreach: filteredLocations">
+                        <button data-bind="text: title, css: type, click: myLocations.animateMarker"></button><br>
                     </div>
                 </div>
                 <div id="map-canvas" class="col-md-9 col-xs-8"> </div>
-
             </div>
         </div>
     </div>

@@ -1,12 +1,13 @@
 body {
     height: 100%;
+    color: green;
 }
 
 #header {
     padding: 10px;
-    border: 2px solid #daf19f;
-    background-color: #f3e07b;
-    color: green;
+    border: 2px solid #cef6bf;
+    background-color: #eef4ed;
+    /*color: green;*/
     height: 120px;
 }
 
@@ -31,9 +32,40 @@ body {
 }
 
 button {
-    margin: 0;
-    padding: 0;
+    margin: 5px;
+    padding: 5px;
     height: 40px;
     width: 100%;
     vertical-align: middle;
+    border-radius: 25px;
+    padding-left: 30px;
+    border-color:#088b08;
 }
+
+    button.restaurant {
+        background: url('../images/restaurant.png');
+        background-position: left;
+        background-repeat: no-repeat;
+        background-color: #f0f6f6; 
+    }
+
+    button.school {
+        background: url('../images/school.png');
+        background-position: left;
+        background-repeat: no-repeat;
+        background-color: #f0f6f6;
+    }
+
+    button.shopping {
+        background: url('../images/shoppingmall.png');
+        background-position: left;
+        background-repeat: no-repeat;
+        background-color: #f0f6f6;
+    }
+
+    button.bar {
+        background: url('../images/bar.png');
+        background-position: left;
+        background-repeat: no-repeat;
+        background-color: #f0f6f6;
+    }

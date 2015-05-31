@@ -1,12 +1,22 @@
-// --------- MODEL ---------------
 
-
+/* This identifies all the map options */
 var mapOptions = {
-    center: new google.maps.LatLng(37.7770072, -121.9813433),
-    zoom: 12
+    center: new google.maps.LatLng(37.773817, -121.924777),
+    zoom: 13
 };
 
+/*  Initialize the map as a global variable     
+*/
+
 var map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+
+/* This is a singleton google InfoWindow for showing Yelp API review results */
+var infowindow = new google.maps.InfoWindow({
+    content: "<div id='yelpReviewWindow'></div>",
+    maxWidth: 250
+});
+
+/* This MODEL represents all the interested locations */
 
 var locationsModel = [
     {
@@ -70,12 +80,12 @@ var locationsModel = [
 		)
     },
     {
-        title: "Dougherty Valley High School",
+        title: "Dougherty Vly Hg. School",
         address: "10550 Albion Rd, San Ramon, CA 94582",
         website: "http://dvhigh.net",
         phone: "(925) 479-6400",
         status: ko.observable("OK"),
-        type: "School",
+        type: "school",
         marker: new google.maps.Marker(
 				{
 				    position: new google.maps.LatLng(0, 0),
@@ -85,12 +95,12 @@ var locationsModel = [
 		)
     },
     {
-        title: "Coyote Creek Elementary School",
+        title: "Coyote Creek Ele. School",
         address: "8700 N Gale Ridge Rd, San Ramon, CA 94582",
         website: "http://ckes.srvusd.k12.ca.us",
         phone: "(925) 735-1183",
         status: ko.observable("OK"),
-        type: "School",
+        type: "school",
         marker: new google.maps.Marker(
 				{
 				    position: new google.maps.LatLng(0, 0),
@@ -100,12 +110,12 @@ var locationsModel = [
 		)
     },
     {
-        title: "Iron Horse Middle School",
+        title: "Iron Horse Md. School",
         address: "12601 Alcosta Blvd, San Ramon, CA 94583",
         website: "http://ih.schoolloop.com",
         phone: "(925) 824-2820",
         status: ko.observable("OK"),
-        type: "School",
+        type: "school",
         marker: new google.maps.Marker(
 				{
 				    position: new google.maps.LatLng(0, 0),
@@ -120,7 +130,7 @@ var locationsModel = [
         website: "http://target.com",
         phone: "(925) 277-0202",
         status: ko.observable("OK"),
-        type: "Shopping",
+        type: "shopping",
         marker: new google.maps.Marker(
 				{
 				    position: new google.maps.LatLng(0, 0),
@@ -135,7 +145,7 @@ var locationsModel = [
         website: "homegoods.com",
         phone: "(925) 277-1308",
         status: ko.observable("OK"),
-        type: "Shopping",
+        type: "shopping",
         marker: new google.maps.Marker(
 				{
 				    position: new google.maps.LatLng(0, 0),
@@ -150,7 +160,7 @@ var locationsModel = [
         website: "http://wholefoodsmarket.com",
         phone: "(925) 355-9000",
         status: ko.observable("OK"),
-        type: "Shopping",
+        type: "shopping",
         marker: new google.maps.Marker(
 				{
 				    position: new google.maps.LatLng(0, 0),
@@ -165,7 +175,7 @@ var locationsModel = [
         website: "http://applebees.com",
         phone: "(925) 327-1400",
         status: ko.observable("OK"),
-        type: "Bar",
+        type: "bar",
         marker: new google.maps.Marker(
                 {
                     position: new google.maps.LatLng(0, 0),
@@ -180,7 +190,7 @@ var locationsModel = [
         website: "http://asconapizza.com",
         phone: "(925) 736-0606",
         status: ko.observable("OK"),
-        type: "Bar",
+        type: "bar",
         marker: new google.maps.Marker(
                 {
                     position: new google.maps.LatLng(0, 0),
@@ -195,7 +205,7 @@ var locationsModel = [
         website: "bayareacrownbilliards.com",
         phone: "(925) 725-3900",
         status: ko.observable("OK"),
-        type: "Bar",
+        type: "bar",
         marker: new google.maps.Marker(
                 {
                     position: new google.maps.LatLng(0, 0),
@@ -206,66 +216,104 @@ var locationsModel = [
     }
 ]
 
-/* ====VIEWMODEL  === */
+/* ====This is the View Model===== */
 
 var locationMarkers = function (locations) {
     var self = this;
+    self.filterCondition = ko.observable("");
 
-    self.searchReq = ko.observable("");     //user input to Search box
-    self.filteredMarkers = ko.computed(function () {
+    /*
+        This computed function returns the filtered list
+        of locations based on the filter criteria
+        entered in the search field.
+        
+    */
+    self.filteredLocations = ko.computed(function () {
         var arrayResults = [];
-        arrayResults = $.grep(locations, function (a) {
-            var titleSearch = a.title.toLowerCase().indexOf(self.searchReq().toLowerCase());
-            return (titleSearch > -1)
+
+        /* This resets all the markers on the map */
+        for (var index = 0; index < locations.length; index++) {
+            locations[index].marker.setMap(null);
+        };
+
+        arrayResults = $.grep(locations, function (input) {
+            var titleSearch = input.title.toLowerCase().indexOf(self.filterCondition().toLowerCase());
+            var typeSearch = input.type.toLowerCase().indexOf(self.filterCondition().toLowerCase());
+            return (((titleSearch > -1) || (typeSearch > -1)) && (input.status() == "OK"))
         });
+
+        /*  This assigns the filtered markers with a map
+            This will limit the markers appearing on the map.
+            This is done asynchronously.
+        */
+        for (var currentIndex = 0; currentIndex < arrayResults.length; currentIndex++) {
+            setTimeout((function (result) {
+                return function () {
+                    result.marker.setMap(map);
+                }
+            }(arrayResults[currentIndex])), 500);
+        };
         return arrayResults;
     });
 
-    //Use street address in model to find LatLng
+    /* Use Google Geocoding API to identify the latitude and longitude 
+    for the locations 
+    These results are fetched asynchronously
+    The markers are animated for their positioning
+    */
     self.initlocations = function (member) {
         geocoder = new google.maps.Geocoder();
         if (member.marker.position.A == 0) {
             geocoder.geocode({ 'address': member.address }, function (results, status) {
-                console.log(member.title);
                 if (status === "OK") {
-                    var location = results[0].geometry.location;
-                    member.marker.position = location;
-                    member.marker.map = map;
-                    member.status = "OK";
+                    member.marker.position = results[0].geometry.location;
                     self.animateMarkers(member);
-                    console.log(member.title);
                 } else if (status === "OVER_QUERY_LIMIT") {
-                    // If status is OVER_QUERY_LIMIT, then wait and re-request
+                    /*  If for some reason, Google API does not return
+                        results or number of queries exceed the limit stipulated,
+                        we try to fetch the results another time asynchronously.
+                    */
                     setTimeout(function () {
                         geocoder.geocode({ 'address': member.address }, function (results, status) {
                             if (results && results.length > 0) {
-                                var location = results[0].geometry.location;
-                                member.marker.position = location;
+                                member.marker.position = results[0].geometry.location;
                                 self.animateMarkers(member);
-                                console.log(member.title);
                             }
                         });
                     }, 3000);
 
                 } else {
-                    //If status is any other error code, then set status to Error, which will remove it from list and map    
-                    member.status = "ERROR";
-                    //Log error information to console
-                    console.log("Error code: ", status, "for Location:", member.title);
+                    /* if for some reason the locations are not fetched
+                    the status attribute is set to error and these errored 
+                    status locations do not participate in filter or 
+                    animated locations */
+                    member.status = ko.observable("ERROR");
+                    console.log("Unable to fetch the location. The Error code: ", status, " for Location:", member.title);
                 }
             });
         }
     }
 
+    /*
+        This will initialize the location with correct latitude
+        & longitude using Google Geocoder API.
+        Additionally it will also set click events for the marker
+        to fetch review data from Yelp API call.
+    */
     self.initialize = function () {
         for (current in locations) {
             self.initlocations(locations[current]);
-            self.setBubble(current);
+            self.addEventListener(locations[current]);
         }
 
     }
 
-    self.toggleBounce = function (currentMarker) {
+    /*
+        When the user clicks on the sidebar button the specific 
+        location is highlighed with animated marker.
+    */
+
+    self.animateMarker = function (currentMarker) {
         if (currentMarker.marker.getAnimation() != null) {
             currentMarker.marker.setAnimation(null);
         } else {
@@ -274,6 +322,10 @@ var locationMarkers = function (locations) {
         }
     }
 
+    /* 
+        This function assigns animation property to the marker
+        asynchronously.
+    */
 
     self.animateMarkers = function (member) {
         setTimeout((function (currentMember) {
@@ -283,32 +335,36 @@ var locationMarkers = function (locations) {
         })(member), 500);
     }
 
-    //Adds infowindows to each marker and populates them with Yelp API request data
-    self.setBubble = function (index) {
+    
+    /*
+        This function assigns listeners tp the markers. On clicking the
+        markers, the info window will show up with details from
+        Yelp API.
+    */
+    self.addEventListener= function (currentLocation) {
         //Add event listener to each map marker to trigger the corresponding infowindow on click
-        google.maps.event.addListener(locations[index].marker, 'click', function () {
-            var infowindow = new google.maps.InfoWindow({
-                content: "<div id='yelpWindow'></div>",
-                maxWidth: 250
-            });
+        google.maps.event.addListener(currentLocation.marker, 'click', function () {
 
             //Request Yelp info, then format it, and place it in infowindow
-            yelpApiCall(locations[index].phone, function (data) {
-                var contentString = "<div id='yelpWindow'>" +
-                                    "<h5>" + "<a href='" + data.mobile_url + "' target='_blank'>" + data.name + "</a>" + "</h5>" +
-                                    "<p>" + data.location.address + "</p>" +
-                                    "<p>" + data.display_phone + "</p>" +
-                                    "<img src='" + data.rating_img_url_large + "'>" +
-                                    "<p>" + data.snippet_text + "</p>" +
+            yelpApiCall(currentLocation.phone, function (data) {
+                var contentString = "<div id='yelpReviewWindow'>" +
+                                    "<h4><u>" + "<a href='" + data.url + "' target='_blank'>" + data.name + "</a>" + "</u></h4>" +
+                                    "<p><b>Address</b> : " + data.location.address + "</p>" +
+                                    "<p><b>Phone </b> : " + data.display_phone + "</p>" +
+                                    "<p><b> Review Count </b>: " + data.review_count + "</p>" +
+                                    "<img src='" + data.rating_img_url_large + "'><br>" +
+                                    "<p> <b>Lastest Review </b>:" + data.snippet_text + "</p>" +
                                     "</div>";
                 infowindow.setContent(contentString);
             });
-            infowindow.open(map, locations[index].marker);
+
+            infowindow.open(map, currentLocation.marker);
         });
     }
 }
 
 
+/* These are the initializers */
 var myLocations = new locationMarkers(locationsModel);
 ko.applyBindings(myLocations);
 google.maps.event.addDomListener(window, 'load', myLocations.initialize);

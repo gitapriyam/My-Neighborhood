@@ -1,5 +1,8 @@
 ﻿
-//Uses phone number from data model to retrieve data from Yelp.
+/*This procedure has been identified with stackoverflow forum 
+    Given a telephone number, it fetches all the review information
+    associated with it.
+*/
 
 var yelpApiCall= function (phoneNumber, callback) {
 
@@ -25,7 +28,7 @@ var yelpApiCall= function (phoneNumber, callback) {
     myParameters.push(['oauth_consumer_key', auth.consumerKey]);
     myParameters.push(['oauth_consumer_secret', auth.consumerSecret]);
     myParameters.push(['oauth_token', auth.accessToken]);
-    myParameters.push(['oauth_signature_method', 'HMAC-SHA1']);
+    myParameters.push(['oauth_signature_method', auth.serviceProvider.signatureMethod]);
 
     var myMessage = {
         'action': 'http://api.yelp.com/v2/phone_search', //Uses Yelp API Phone Search. 
@@ -48,8 +51,8 @@ var yelpApiCall= function (phoneNumber, callback) {
             callback(data.businesses[0]);
         }
     }).fail(function (e) {
-        $('#yelpWindow').text("Error: Yelp data could not be loaded");  //Error handling - Display error message
-    });                                                               //in infowindow if the ajax request does not succeed.
+        $('#yelpReviewWindow').text("Error: Yelp data could not be loaded");  
+    });                                                               
 }
 
 
