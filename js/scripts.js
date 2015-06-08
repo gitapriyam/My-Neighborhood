@@ -1,4 +1,4 @@
-
+"use strict";
 /* This identifies all the map options */
 var mapOptions = {
     center: new google.maps.LatLng(37.773817, -121.924777),
@@ -12,8 +12,7 @@ var map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions)
 
 /* This is a singleton google InfoWindow for showing Yelp API review results */
 var infowindow = new google.maps.InfoWindow({
-    content: "<div id='yelpReviewWindow'></div>",
-    maxWidth: 250
+    content: "<div id='yelpReviewWindow'></div>"
 });
 
 /* This MODEL represents all the interested locations */
@@ -214,7 +213,7 @@ var locationsModel = [
                 }
         )
     }
-]
+];
 
 /* ====This is the View Model===== */
 
@@ -232,12 +231,12 @@ var locationMarkers = function (locations) {
         /* This resets all the markers on the map */
         for (var index = 0; index < locations.length; index++) {
             locations[index].marker.setMap(null);
-        };
+        }
 
         var searchLocations = $.grep(locations, function (input) {
             var nameSearch = input.title.toLowerCase().indexOf(self.filterCondition().toLowerCase());
             var typeSearch = input.type.toLowerCase().indexOf(self.filterCondition().toLowerCase());
-            return (((nameSearch > -1) || (typeSearch == 0 )) && (input.status() == "OK"))
+            return (((nameSearch > -1) || (typeSearch === 0)) && (input.status() == "OK"));
         });
 
         /*  This assigns the filtered markers with a map
@@ -248,9 +247,9 @@ var locationMarkers = function (locations) {
             setTimeout((function (result) {
                 return function () {
                     result.marker.setMap(map);
-                }
+                };
             }(searchLocations[currentIndex])), 500);
-        };
+        }
         return searchLocations;
     });
 
@@ -260,8 +259,8 @@ var locationMarkers = function (locations) {
     The markers are animated for their positioning
     */
     self.initlocations = function (currentLocation) {
-        geocoder = new google.maps.Geocoder();
-        if (currentLocation.marker.position.A == 0) {
+        var geocoder = new google.maps.Geocoder();
+        if (currentLocation.marker.position.A === 0) {
             geocoder.geocode({ 'address': currentLocation.address }, function (results, status) {
                 if (status === "OK") {
                     currentLocation.marker.position = results[0].geometry.location;
@@ -273,9 +272,11 @@ var locationMarkers = function (locations) {
                     */
                     setTimeout(function () {
                         geocoder.geocode({ 'address': currentLocation.address }, function (results, status) {
-                            if (results && results.length > 0) {
-                                currentLocation.marker.position = results[0].geometry.location;
-                                self.animateMarkers(currentLocation);
+                            if (status === "OK") {
+                                if (results && results.length > 0) {
+                                    currentLocation.marker.position = results[0].geometry.location;
+                                    self.animateMarkers(currentLocation);
+                                }
                             }
                         });
                     }, 3000);
@@ -290,7 +291,7 @@ var locationMarkers = function (locations) {
                 }
             });
         }
-    }
+    };
 
     /*
         This will initialize the location with correct latitude
@@ -299,12 +300,11 @@ var locationMarkers = function (locations) {
         to fetch review data from Yelp API call.
     */
     self.initialize = function () {
-        for (current in locations) {
+        for (var current in locations) {
             self.initlocations(locations[current]);
             self.addEventListener(locations[current]);
         }
-
-    }
+    };
 
     /*
         When the user clicks on the sidebar button the specific 
@@ -313,8 +313,8 @@ var locationMarkers = function (locations) {
 
     self.animateMarker = function (currentLocation) {
         currentLocation.marker.setAnimation(google.maps.Animation.BOUNCE);
-        setTimeout(function () { currentLocation.marker.setAnimation(null) }, 1000);
-    }
+        setTimeout(function () { currentLocation.marker.setAnimation(null); }, 1000);
+    };
 
     /* 
         This function assigns animation property to the marker
@@ -325,9 +325,9 @@ var locationMarkers = function (locations) {
         setTimeout((function (currentcurrentLocation) {
             return function () {
                 currentcurrentLocation.marker.setAnimation(google.maps.Animation.DROP);
-            }
+            };
         })(currentLocation), 500);
-    }
+    };
 
 
     /*
@@ -347,15 +347,15 @@ var locationMarkers = function (locations) {
                                     "<p><b>Phone </b> : " + data.display_phone + "</p>" +
                                     "<p><b> Review Count </b>: " + data.review_count + "</p>" +
                                     "<img src='" + data.rating_img_url_large + "'><br>" +
-                                    "<p> <b>Lastest Review </b>:" + data.snippet_text + "</p>" +
+                                    //"<p> <b>Lastest Review </b>:" + data.snippet_text + "</p>" +
                                     "</div>";
                 infowindow.setContent(contentString);
             });
 
             infowindow.open(map, currentLocation.marker);
         });
-    }
-}
+    };
+};
 
 
 /* These are the initializers */
